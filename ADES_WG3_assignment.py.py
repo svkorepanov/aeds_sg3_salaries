@@ -3,7 +3,7 @@
 
 # ### Imports
 
-# In[1]:
+# In[82]:
 
 
 import os
@@ -24,8 +24,6 @@ from sklearn import metrics
 from sklearn.linear_model import LinearRegression, SGDRegressor
 from sklearn.tree import DecisionTreeRegressor, plot_tree
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.svm import SVR
 import dtreeviz
 
 # https://www.scikit-yb.org/
@@ -49,7 +47,7 @@ os.getcwd()
 # For example some of the job postings are missing `salary data` which is very important for our project.
 # 
 
-# In[2]:
+# In[83]:
 
 
 df = pd.read_csv('./content/sample_data/us-software-engineer-jobs-zenrows.csv')
@@ -73,7 +71,7 @@ df.head()
 # 
 # 
 
-# In[3]:
+# In[84]:
 
 
 df.info()
@@ -88,7 +86,7 @@ df_cleaned = df.drop(columns_to_drop, axis=1)
 # ## Cleaned Data Set
 # Here is the data remained after cleaning
 
-# In[4]:
+# In[85]:
 
 
 df_cleaned.head()
@@ -104,7 +102,7 @@ df_cleaned.head()
 # ### Converting Salary Data
 # let's look at the unique values in the 'salary' column to understand the data better
 
-# In[5]:
+# In[86]:
 
 
 # Get unique values after dropping NaNs
@@ -120,7 +118,7 @@ unique_salaries_df.head(n=100)
 # 
 # - Let's try to convert all of them to yearly salary
 
-# In[6]:
+# In[87]:
 
 
 # Cleaning symbols
@@ -141,7 +139,7 @@ df_cleaned['salary_temp'] = df_cleaned['salary'].apply(clean_text)
 df_cleaned['salary_temp']
 
 
-# In[7]:
+# In[88]:
 
 
 # Define the assumption for hours worked per year
@@ -217,7 +215,7 @@ dataframe['avg_salary'] = dataframe[['min_salary', 'max_salary']].mean(axis=1).a
 print(dataframe)
 
 
-# In[8]:
+# In[148]:
 
 
 # Get the numeric columns
@@ -233,39 +231,10 @@ df_scaled_numeric = pd.DataFrame(df_scaled_numeric, columns=numeric_columns)
 # Now, concatenate the scaled numeric columns with the non-numeric columns
 dataframe_scaled = pd.concat([dataframe.drop(columns=numeric_columns), df_scaled_numeric], axis=1)
 
-# Before Normalization
-plt.figure(figsize=(10, 6))
-sns.barplot(x='types', y='avg_salary', data=dataframe)
-plt.title('Distribution of Average Salaries Across Contract Types (Before Normalization)')
-plt.xlabel('Contract Type')
-plt.ylabel('Average Salary')
-plt.xticks(rotation=45)
-plt.show()
-
-# Normalizing contract types (one-hot encoding)
-contract_types_encoded = pd.get_dummies(dataframe_scaled['types'], prefix='contract')
-dataframe_scaled = pd.concat([dataframe_scaled, contract_types_encoded], axis=1)
-
-# Splitting the data into predictors and target variable
-X = dataframe_scaled.drop(columns=['avg_salary'])  # predictors
-y = dataframe_scaled['avg_salary']  # target variable
-
-# Splitting the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-
-# After Normalization
-plt.figure(figsize=(10, 6))
-sns.barplot(x='types', y='avg_salary', data=dataframe_scaled)
-plt.title('Distribution of Average Salaries Across Contract Types (After Normalization)')
-plt.xlabel('Contract Type')
-plt.ylabel('Average Salary')
-plt.xticks(rotation=45)
-plt.show()
-
 
 # ### Extracting State from Location
 
-# In[9]:
+# In[149]:
 
 
 # Function to extract state abbreviation from location
@@ -286,7 +255,7 @@ dataframe.loc[:,'state'] = dataframe.loc[:,'location'].apply(extract_state)
 
 # ## Descriptive analysis
 
-# In[10]:
+# In[150]:
 
 
 dataframe.describe()
@@ -294,7 +263,7 @@ dataframe.describe()
 
 # ### Most frequent numbers
 
-# In[11]:
+# In[151]:
 
 
 dataframe.mode()
@@ -302,7 +271,7 @@ dataframe.mode()
 
 # ### Variance
 
-# In[12]:
+# In[152]:
 
 
 dataframe.var(numeric_only=True)
@@ -310,41 +279,31 @@ dataframe.var(numeric_only=True)
 
 # ### Standard deviation
 
-# In[13]:
+# In[153]:
 
 
 dataframe.std(numeric_only=True)
 
 
-# In[13]:
-
-
-
-
-
 # ### Range
 
-# In[14]:
+# In[154]:
 
 
-# Calculate the range for each numeric column
-
-column_ranges = dataframe.select_dtypes(include=[np.number]).apply(lambda x: x.max() - x.min())
+# dataframe.max(numeric_only=True) - dataframe.min(numeric_only=True)
 
 
 # ### Interquartile Range
 
-# In[15]:
+# In[155]:
 
 
-# Calculate the interquartile range for each numeric column
-
-column_iqr = dataframe.describe().loc['75%'] - dataframe.describe().loc['25%']
+# dataframe.quantile(0.75, numeric_only=True) - dataframe.quantile(0.25, numeric_only=True)
 
 
 # ### Distribution analysis
 
-# In[16]:
+# In[156]:
 
 
 plt.figure(figsize=(8, 6))
@@ -358,7 +317,7 @@ plt.show()
 
 # ### Frequency table
 
-# In[17]:
+# In[157]:
 
 
 # Frequency table of salaries
@@ -371,7 +330,7 @@ print(frequency_table)
 
 # ### Mean Salaries by State
 
-# In[18]:
+# In[158]:
 
 
 mean_salaries = dataframe.groupby('state')['avg_salary'].mean()
@@ -390,7 +349,7 @@ plt.show()
 
 # ### Mean Salary by contract
 
-# In[19]:
+# In[159]:
 
 
 mean_salaries = dataframe.groupby('types')['avg_salary'].mean()
@@ -409,7 +368,7 @@ plt.show()
 
 # ### Mean Salary by urgency
 
-# In[20]:
+# In[160]:
 
 
 mean_salaries = dataframe.groupby('urgently_hiring')['avg_salary'].mean()
@@ -420,7 +379,7 @@ plt.bar(mean_salaries.index, mean_salaries.values)
 
 plt.xlabel('Contract Type')
 plt.ylabel('Mean Salary')
-plt.title('Mean Salary by Urgency')
+plt.title('Mean Salary by Contract Type')
 plt.xticks(rotation=90) 
 
 plt.show()
@@ -428,7 +387,7 @@ plt.show()
 
 # ### Mean Salary by sponsorship
 
-# In[21]:
+# In[161]:
 
 
 mean_salaries = dataframe.groupby('sponsored')['avg_salary'].mean()
@@ -439,7 +398,7 @@ plt.bar(mean_salaries.index, mean_salaries.values)
 
 plt.xlabel('Contract Type')
 plt.ylabel('Mean Salary')
-plt.title('Mean Salary by Ads')
+plt.title('Mean Salary by Contract Type')
 plt.xticks(rotation=90) 
 
 plt.show()
@@ -447,7 +406,7 @@ plt.show()
 
 # ### Box plot of salaries by location
 
-# In[22]:
+# In[162]:
 
 
 plt.figure(figsize=(20, 6))
@@ -462,7 +421,7 @@ plt.show()
 
 # ### Correlation coefficient
 
-# In[23]:
+# In[163]:
 
 
 # location_mapping = {location: i for i, location in enumerate(dataframe['state'].unique())}
@@ -476,20 +435,19 @@ print("correlation Coefficient:", correlation_coefficient)
 
 # # Clustering
 
-# In[24]:
+# In[164]:
 
 
-dataframe['contract_encoded'] = dataframe['types'].astype('category').cat.codes
 dataframe['state_encoded'] = dataframe['state'].astype('category').cat.codes
 dataframe['urgency_encoded'] = dataframe['urgently_hiring'].astype('category').cat.codes
 dataframe['ads_encoded'] = dataframe['sponsored'].astype('category').cat.codes
 
-dataframe_num = dataframe[['avg_salary', 'state_encoded', 'urgency_encoded', 'ads_encoded', 'contract_encoded']]
+dataframe_num = dataframe[['avg_salary', 'state_encoded', 'urgency_encoded', 'ads_encoded']]
 
 dataframe_num
 
 
-# In[25]:
+# In[165]:
 
 
 scaler = StandardScaler()
@@ -500,14 +458,14 @@ df_salaries_scaled.describe()
 
 # ### K-means
 
-# In[26]:
+# In[166]:
 
 
 k = 3
 km = KMeans(n_clusters=k, init='k-means++', n_init=10, random_state=0) #setup the k-means algorithm
 
 
-# In[27]:
+# In[167]:
 
 
 km.fit(df_salaries_scaled)
@@ -516,7 +474,7 @@ print(km.cluster_centers_) # shows the centroids
 print(km.labels_)          # shows the labels to which each point belongs
 
 
-# In[28]:
+# In[168]:
 
 
 def visualize_clusters(data, cluster_out, clust_alg=""):
@@ -537,19 +495,19 @@ def visualize_clusters(data, cluster_out, clust_alg=""):
     plt.show()
 
 
-# In[29]:
+# In[169]:
 
 
 visualize_clusters(df_salaries_scaled, km, "Kmeans")
 
 
-# In[30]:
+# In[170]:
 
 
 print("Avg silhouette score = ", silhouette_score(df_salaries_scaled, km.labels_))
 
 
-# In[31]:
+# In[171]:
 
 
 visualizer = SilhouetteVisualizer(km, colors='yellowbrick')
@@ -557,7 +515,7 @@ visualizer.fit(df_salaries_scaled) # fits the data to the visualiser
 visualizer.show()                      # renders the silhouette plot
 
 
-# In[32]:
+# In[172]:
 
 
 visualizer = KElbowVisualizer(km, k=(1, 20))
@@ -565,10 +523,10 @@ visualizer.fit(df_salaries_scaled)
 visualizer.show()
 
 
-# In[33]:
+# In[173]:
 
 
-k = 6
+k = 5
 km = KMeans(n_clusters=k, init='k-means++', n_init=10, random_state=0)  #setup the k-means algorithm
 km.fit(df_salaries_scaled)
 
@@ -576,13 +534,13 @@ print(km.cluster_centers_)  # shows the centroids
 print(km.labels_) 
 
 
-# In[34]:
+# In[174]:
 
 
 visualize_clusters(df_salaries_scaled, km, "Kmeans")
 
 
-# In[35]:
+# In[175]:
 
 
 print("Avg silhouette score = ", silhouette_score(df_salaries_scaled, km.labels_), "\n")
@@ -594,7 +552,7 @@ visualizer.show()
 
 # ### DBSCAN
 
-# In[36]:
+# In[176]:
 
 
 #dbscan = DBSCAN() # eps = 0.5, min_samples = 5 (default)
@@ -602,20 +560,20 @@ dbscan = DBSCAN(eps=0.5, min_samples=50) # changing the default parameters
 dbscan.fit(df_salaries_scaled)
 
 
-# In[37]:
+# In[177]:
 
 
 print("Avg silhouette score = ", silhouette_score(df_salaries_scaled,dbscan.labels_))
 print(dbscan.labels_)
 
 
-# In[38]:
+# In[178]:
 
 
 visualize_clusters(df_salaries_scaled, dbscan, "DBSCAN")
 
 
-# In[39]:
+# In[179]:
 
 
 dbscan = DBSCAN(eps=0.9, min_samples=150) # changing the default parameters
@@ -629,25 +587,25 @@ print(dbscan.labels_)
 
 # ### Agglomerative Hierarchical Clustering
 
-# In[40]:
+# In[180]:
 
 
 hac=AgglomerativeClustering(n_clusters=4, metric='euclidean', linkage='single')
 
 
-# In[41]:
+# In[181]:
 
 
 hac.fit(df_salaries_scaled)
 
 
-# In[42]:
+# In[182]:
 
 
 print("Avg silhouette score = ", silhouette_score(df_salaries_scaled,hac.labels_))
 
 
-# In[43]:
+# In[183]:
 
 
 visualize_clusters(df_salaries_scaled, hac, "HAC")
@@ -658,10 +616,10 @@ visualize_clusters(df_salaries_scaled, hac, "HAC")
 # - predictors - 'state_encoded', 'urgency_encoded', 'ads_encoded'
 # - target value - 'avg_salary'
 
-# In[44]:
+# In[184]:
 
 
-cols = ['state_encoded', 'urgency_encoded', 'ads_encoded', 'contract_encoded'];
+cols = ['state_encoded', 'urgency_encoded', 'ads_encoded'];
 
 X = dataframe_num[cols]
 y = dataframe_num['avg_salary']
@@ -669,7 +627,7 @@ y = dataframe_num['avg_salary']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
 
 
-# In[45]:
+# In[185]:
 
 
 # define a function for evaluation metrics
@@ -687,7 +645,7 @@ def evaluation_metrics(pred_value):
     print('R-squared:', metrics.r2_score(y_test, pred_value))
 
 
-# In[46]:
+# In[186]:
 
 
 def residuals_plot(pred):
@@ -702,14 +660,14 @@ def residuals_plot(pred):
 
 # ### Linear Regression
 
-# In[47]:
+# In[187]:
 
 
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 
-# In[48]:
+# In[188]:
 
 
 # running predictions over a test set
@@ -723,7 +681,7 @@ y_pred
 
 # 
 
-# In[49]:
+# In[189]:
 
 
 errors = abs(y_pred - y_test)
@@ -731,7 +689,7 @@ errors = abs(y_pred - y_test)
 errors
 
 
-# In[50]:
+# In[190]:
 
 
 evaluation_metrics(y_pred)
@@ -739,7 +697,7 @@ evaluation_metrics(y_pred)
 
 # ### Visualisation
 
-# In[51]:
+# In[191]:
 
 
 residuals_plot(y_pred)
@@ -749,16 +707,16 @@ residuals_plot(y_pred)
 # Here we see R-squared really close to 0, which is awful.
 # Let's try to improve performance a bit
 
-# In[52]:
+# In[192]:
 
 
 # gradient descent model 
-gd_model = SGDRegressor(max_iter=30000)
+gd_model = SGDRegressor(max_iter=10000)
 
 gd_model.fit(X_train, y_train)
 
 
-# In[53]:
+# In[193]:
 
 
 gd_pred = gd_model.predict(X_test)
@@ -768,7 +726,7 @@ gd_pred
 
 # ### Evaluation Metrics (Gradient Descent)
 
-# In[54]:
+# In[194]:
 
 
 gd_errors = abs(gd_pred - y_test)
@@ -776,7 +734,7 @@ gd_errors = abs(gd_pred - y_test)
 gd_errors
 
 
-# In[55]:
+# In[195]:
 
 
 evaluation_metrics(gd_pred)
@@ -788,7 +746,7 @@ evaluation_metrics(gd_pred)
 # 
 # Applying 30k iteration gave us similar result compared to simple Linear Regression
 
-# In[56]:
+# In[196]:
 
 
 residuals_plot(gd_pred)
@@ -798,7 +756,7 @@ residuals_plot(gd_pred)
 
 # ### Decision Tree first attempt
 
-# In[57]:
+# In[197]:
 
 
 # Create a DecisionTreeRegressor object
@@ -808,7 +766,7 @@ tree = DecisionTreeRegressor(max_depth=3)
 tree.fit(X_train, y_train)
 
 
-# In[58]:
+# In[198]:
 
 
 tree_pred = tree.predict(X_test)
@@ -818,7 +776,7 @@ tree_pred
 
 # ### Evaluation Metrics (Decision Tree)
 
-# In[59]:
+# In[199]:
 
 
 evaluation_metrics(tree_pred)
@@ -828,7 +786,7 @@ evaluation_metrics(tree_pred)
 
 # ### Visualisation
 
-# In[60]:
+# In[200]:
 
 
 # plot the tree
@@ -840,13 +798,13 @@ viz = dtreeviz.model(
     feature_names=cols)
 
 
-# In[61]:
+# In[201]:
 
 
 viz.rtree_feature_space(features=['state_encoded'])
 
 
-# In[62]:
+# In[202]:
 
 
 # viz.rtree_feature_space3D(features=['state_encoded','urgency_encoded'],
@@ -866,7 +824,7 @@ viz.rtree_feature_space(features=['state_encoded'])
 
 # We will choose the best set of params using GridSearchCV
 
-# In[63]:
+# In[203]:
 
 
 # Define the parameter grid
@@ -901,7 +859,7 @@ best_pred = best_tree.predict(X_test)
 
 # ### Evaluation Metrics with best params
 
-# In[64]:
+# In[204]:
 
 
 evaluation_metrics(best_pred)
@@ -909,7 +867,7 @@ evaluation_metrics(best_pred)
 
 # ### Visualisation with best params
 
-# In[65]:
+# In[205]:
 
 
 # plot the tree
@@ -922,85 +880,8 @@ viz = dtreeviz.model(
 viz.rtree_feature_space(features=['state_encoded'])
 
 
-# In[66]:
+# In[206]:
 
 
 residuals_plot(best_pred)
-
-
-# # Random Forest Regression (ensemble learning method)
-
-# ### Random Forest Application
-
-# In[67]:
-
-
-randomForest = RandomForestRegressor(n_estimators=100, random_state=123)
-
-randomForest.fit(X_train, y_train)
-
-
-# In[68]:
-
-
-rf_pred = randomForest.predict(X_test)
-
-
-# ### Evaluation Metrics (Random Forest)
-
-# In[69]:
-
-
-evaluation_metrics(rf_pred)
-
-
-# # Gradient Boosting Regression
-
-# ### Gradient Boosting Regression Application
-
-# In[70]:
-
-
-gbr = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=1, random_state=123, loss='squared_error')
-
-gbr.fit(X_train, y_train)
-
-
-# In[71]:
-
-
-gbr_pred = gbr.predict(X_test)
-
-
-# ### Evaluation Metrics (Gradient Boosting Regression)
-
-# In[72]:
-
-
-evaluation_metrics(gbr_pred)
-
-
-# # Support Vector Regression
-
-# ### Support Vector Regression Application
-
-# In[73]:
-
-
-svr = SVR(kernel='linear', C=1.0, epsilon=0.2)
-svr.fit(X_train, y_train)
-
-
-# In[74]:
-
-
-svr_pred = svr.predict(X_test)
-
-
-# ### Evaluation Metrics (Support Vector Regression)
-
-# In[75]:
-
-
-evaluation_metrics(svr_pred)
 
